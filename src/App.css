@@ -1,0 +1,11 @@
+.App {
+  background: #F4F5F8 ;
+  min-height: 100vh;
+}
+.TicketContainer{
+  padding: 0 2rem;
+  overflow-y: auto;
+  overflow-x: auto;
+  display: flex;
+  flex-direction: row;
+}

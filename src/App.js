@@ -3,9 +3,9 @@ import "./App.css";
 
 import NavBar from "./NavBar";
 import TicketColumn from "./TicketColumn";
-import getLogoByKey from "./assets/logo";
 
 function App() {
+  const [isOpen, setIsOpen] = useState(false);
   const grpOptions = ["status", "user", "priority"];
   const [grouping, setGrouping] = useState(grpOptions[0]);
   const orderOptions = ["priority", "title"];
@@ -13,6 +13,7 @@ function App() {
 
   const [ticketsData, setTicketData] = useState([]);
   const [userData, setUserData] = useState([]);
+  const statusTypes = ["Backlog", "Todo", "In progress", "Done", "Canceled"];
 
   const [dataToShow, setDataToShow] = useState({});
   const [groupingData, setGroupingData] = useState({});
@@ -27,65 +28,34 @@ function App() {
       .then((data) => {
         console.log(data);
         setTicketData(data.tickets);
-        groupByPriority(data.tickets);
         setUserData(data.users);
       });
   };
 
-  const groupByPriority = (data) => {
+  const groupBy = (data, grp, order) => {
     const output = {};
     data.forEach((item) => {
-      const priority = item.priority;
-      if (Object.keys(output).includes(priority.toString())) {
-        output[priority].push(item);
+      const group = item[grp];
+      if (Object.keys(output).includes(group.toString())) {
+        output[group].push(item);
       } else {
-        output[priority] = [item];
+        output[group] = [item];
       }
     });
-    Object.keys(output).forEach((key) => {
-      output[key].sort((a, b) => (a.title < b.title ? -1 : 1));
-    });
-    setDataToShow(output);
+    const result = sortData(output, order);
+    setDataToShow(result);
   };
 
-  const groupByStatus = (data) => {
-    const output = {};
-    data.forEach((item) => {
-      const status = item.status;
-      if (Object.keys(output).includes(status.toString())) {
-        output[status].push(item);
-      } else {
-        output[status] = [item];
-      }
-    });
+  const sortData = (obj, order) => {
+    const output = obj;
     Object.keys(output).forEach((key) => {
-      if (ordering === "title") {
+      if (order === "title") {
         output[key].sort((a, b) => (a.title < b.title ? -1 : 1));
       } else {
         output[key].sort((a, b) => (a.priority > b.priority ? -1 : 1));
       }
     });
-    setDataToShow(output);
-  };
-
-  const groupByUser = (data) => {
-    const output = {};
-    data.forEach((item) => {
-      const userId = item.userId;
-      if (Object.keys(output).includes(userId.toString())) {
-        output[userId].push(item);
-      } else {
-        output[userId] = [item];
-      }
-    });
-    Object.keys(output).forEach((key) => {
-      if (ordering === "title") {
-        output[key].sort((a, b) => (a.title < b.title ? -1 : 1));
-      } else {
-        output[key].sort((a, b) => (a.priority > b.priority ? -1 : 1));
-      }
-    });
-    setDataToShow(output);
+    return obj;
   };
 
   useEffect(() => {
@@ -112,15 +82,28 @@ function App() {
 
   useEffect(() => {
     if (grouping === "status") {
-      groupByStatus(ticketsData);
+      groupBy(ticketsData, "status", ordering);
     } else if (grouping === "user") {
-      groupByUser(ticketsData);
+      groupBy(ticketsData, "userId", ordering);
     } else {
-      groupByPriority(ticketsData);
+      groupBy(ticketsData, "priority", "title");
     }
     setGroupingData(grouping);
     console.log(dataToShow);
   }, [ticketsData, grouping, ordering]);
+
+  const getUserDetails = (userId) => {
+    const user = userData.find((user) => user.id === userId);
+
+    if (user) {
+      return {
+        name: user.name,
+        available: user.available,
+      };
+    } else {
+      return null; // User not found
+    }
+  };
 
   return (
     <div className="App">
@@ -131,19 +114,45 @@ function App() {
         ordering={ordering}
         setGrouping={setGrouping}
         setOrdering={setOrdering}
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
       />
-      <div className="TicketContainer">
-        {Object.keys(dataToShow).map((key) => {
-          const logo = getLogoByKey(key);
+      <div onClick={() => setIsOpen(false)} className="TicketContainer">
+        {Object.keys(dataToShow).map((key, idx) => {
+          const userDetails = getUserDetails(key);
+          let heading = key;
+          if (userDetails) {
+            heading = userDetails.name;
+          }
           return (
             <TicketColumn
               data={dataToShow[key]}
               groupingData={groupingData}
-              heading={key}
-              logo={logo}
+              heading={heading}
+              logo={key}
+              key={idx}
+              userData={userData}
+              isOnline={userDetails?.available}
             />
           );
         })}
+        {groupingData === "status" &&
+          statusTypes.map((key, idx) => {
+            if (!Object.keys(dataToShow).includes(key)) {
+              return (
+                <TicketColumn
+                  data={[]}
+                  groupingData={groupingData}
+                  heading={key}
+                  logo={key}
+                  key={idx}
+                  userData={userData}
+                />
+              );
+            } else {
+              return null;
+            }
+          })}
       </div>
     </div>
   );

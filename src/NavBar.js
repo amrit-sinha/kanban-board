@@ -1,6 +1,6 @@
-import React, { useState } from "react";
 import "./NavBar.css";
-import getLogoByKey from "./assets/logo";
+import LogoByKey from "./logo";
+import down from "./assets/down.png";
 
 const NavBar = ({
   grouping,
@@ -9,16 +9,16 @@ const NavBar = ({
   setOrdering,
   grpOptions,
   orderOptions,
+  isOpen,
+  setIsOpen,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const settingsLogo = getLogoByKey("settings");
   return (
     <div className="navbar">
       <div className="container">
         <div className="displayBtn" onClick={() => setIsOpen(!isOpen)}>
-          {" "}
-          <img src = {settingsLogo} alt="Display settings icon" className="logo"></img>
-          Display
+          <LogoByKey logoName={"settings"} />
+          <div>Display</div>
+          <img src={down} alt="plus icon" className="logo" />
         </div>
         {isOpen && (
           <div className="sortModal">

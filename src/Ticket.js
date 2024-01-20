@@ -1,39 +1,21 @@
 import React from "react";
 import "./Ticket.css";
-import getLogoByKey from "./assets/logo";
+import LogoByKey from "./logo";
 
-const Ticket = ({ data, groupingData }) => {
-  const userLogo = getLogoByKey(data.userId);
-  const statusLogo = getLogoByKey(data.status);
-  const priorityLogo = getLogoByKey(data.priority);
+const Ticket = ({ data, groupingData, isOnline }) => {
   return (
     <div className="ticketBox">
       <div className="line1">
         <div className="IdContainer">{data.id}</div>
         {groupingData !== "user" && (
-          <div className="logoContainer">
-            <img
-              src={userLogo}
-              alt={`logo for ${data.userId}`}
-              className="logo"
-            />
-            {false ? (
-              <div className="statusDot online"></div>
-            ) : (
-              <div className="statusDot offline"></div>
-            )}
-          </div>
+          <LogoByKey logoName={data.userId} isOnline={isOnline} />
         )}
       </div>
       <div className="line2">
         {groupingData !== "status" && (
           <div>
             {data.status ? (
-              <img
-                src={statusLogo}
-                alt={`logo for ${data.status}`}
-                className="logo"
-              />
+              <LogoByKey logoName={data.status} />
             ) : (
               <div>{data.status}</div>
             )}
@@ -43,12 +25,8 @@ const Ticket = ({ data, groupingData }) => {
       </div>
       <div className="line3">
         {groupingData !== "priority" && (
-          <div>
-            <img
-              src={priorityLogo}
-              alt={`logo for priority ${data.priority}`}
-              className="logo"
-            ></img>
+          <div className="pr">
+            <LogoByKey logoName={data.priority.toString()} />
           </div>
         )}
         {data.tag.map((tag) => {

@@ -3,6 +3,7 @@ import "./App.css";
 
 import NavBar from "./NavBar";
 import TicketColumn from "./TicketColumn";
+import data from "./data.json";
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,18 +20,6 @@ function App() {
   const [groupingData, setGroupingData] = useState({});
 
   const [checkedStorage, setCheckedStorage] = useState(false);
-
-  const fetchData = async () => {
-    await fetch("https://api.quicksell.co/v1/internal/frontend-assignment")
-      .then((res) => {
-        return res.json();
-      })
-      .then((data) => {
-        console.log(data);
-        setTicketData(data.tickets);
-        setUserData(data.users);
-      });
-  };
 
   const groupBy = (data, grp, order) => {
     const output = {};
@@ -59,7 +48,8 @@ function App() {
   };
 
   useEffect(() => {
-    fetchData();
+    setTicketData(data.tickets);
+    setUserData(data.users);
     if (!checkedStorage) {
       const grp = localStorage.getItem("grouping");
       const ord = localStorage.getItem("ordering");
